@@ -226,11 +226,24 @@ def setupAndSaveNewTrees(it0, it1, IDlist, input_filename, stdEvents, lowEvents)
         outfile.Close()
 
 
-# FIXME: OPTIMIZTE NUMBER OF THREADS HERE
+# setup threads
+iterators = [0]*options.Nthreads
+jobs = int(round(len(IDlist)/options.Nthreads))
+extrajobs = int(len(IDlist) % options.Nthreads)
+
+for i in range(len(iterators)):
+    iterators[i] = iterators[i - 1] + jobs
+    if(extrajobs > 0):
+        iterators[i] += 1
+        extrajobs -= 1
+
+assert iterators[-1] == len(IDlist)
+assert len(iterators) == options.Nthreads
+
 proc = {}
-for i in range(len(IDlist)):
-    it0 = i
-    it1 = i+1
+for i in range(len(iterators)):
+    it0 = 0 if i == 0 else iterators[i - 1]
+    it1 = iterators[i]
     proc[i] = multiprocessing.Process(target=setupAndSaveNewTrees, args=(it0, it1, IDlist, options.filename, stdEvents, lowEvents))
     proc[i].start()
 
