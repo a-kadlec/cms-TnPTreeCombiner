@@ -136,9 +136,23 @@ Nentries = std_tree.GetEntries()
 synclock = multiprocessing.Lock()
 proc = {}
 
+
+# setup threads
+iterators = [0]*options.Nthreads
+jobs = int(Nentries/options.Nthreads)
+extrajobs = int(Nentries % options.Nthreads)
+
+for i in range(len(iterators)):
+    iterators[i] = iterators[i - 1] + jobs
+    if(extrajobs > 0):
+        iterators[i] += 1
+        extrajobs -= 1
+
 for i in range(options.Nthreads):
-    it0 = 0 + i * (Nentries) / options.Nthreads 
-    it1 = 0 + (i+1) * (Nentries) / options.Nthreads 
+    #it0 = 0 + i * (Nentries) / options.Nthreads 
+    #it1 = 0 + (i+1) * (Nentries) / options.Nthreads 
+    it0 = 0 if i == 0 else iterators[i - 1]
+    it1 = iterators[i]
     proc[i] = multiprocessing.Process(target=findOverlapEntries, args=(synclock, it0, it1, options.filename, lowEvents, stdEvents, conditionstrings))
     proc[i].start()
 
@@ -228,7 +242,8 @@ def setupAndSaveNewTrees(it0, it1, IDlist, input_filename, stdEvents, lowEvents)
 
 # setup threads
 iterators = [0]*options.Nthreads
-jobs = int(round(len(IDlist)/options.Nthreads))
+#jobs = int(round(len(IDlist)/options.Nthreads))
+jobs = int(len(IDlist)/options.Nthreads)
 extrajobs = int(len(IDlist) % options.Nthreads)
 
 for i in range(len(iterators)):
@@ -267,8 +282,8 @@ for id_i in range(len(IDlist)):
     newdir.WriteObject(savetree,"fitter_tree")
     outfile.Close()
 
-#for id_i in range(len(IDlist)):
-#    os.remove("./combiner_temp-"+IDlist[id_i]+".root")
+for id_i in range(len(IDlist)):
+    os.remove("./combiner_temp-"+IDlist[id_i]+".root")
 
 
 now = datetime.now()
