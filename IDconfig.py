@@ -1,7 +1,8 @@
 
 
 
-IDs_to_test = ["","CBVeto", "CBLoose", "CBMedium", "CBTight", "noisoCBVeto", "noisoCBLoose", "noisoCBMedium", "noisoCBTight"]
+#IDs_to_test = ["","CBVeto", "CBLoose", "CBMedium", "CBTight", "noisoCBVeto", "noisoCBLoose", "noisoCBMedium", "noisoCBTight"]
+IDs_to_test = ["noisoCBLoose"]  # speed this up, just check what we need
 '''
 Possible options to add are the dict keys in the function below
 '''
