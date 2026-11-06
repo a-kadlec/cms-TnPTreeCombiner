@@ -120,7 +120,7 @@ def findOverlapEntries(synclock, it0, it1, input_filename, lowEvents, stdEvents,
             if std_tree.run == lowpt_tree.run and std_tree.event == lowpt_tree.event and dR(std_tree.tag_Ele_eta, lowpt_tree.tag_Ele_eta, std_tree.tag_Ele_phi, lowpt_tree.tag_Ele_phi) < 0.001 and abs(std_tree.tag_Ele_pt - lowpt_tree.tag_Ele_pt) < 0.001:
                 # same event (because we have same tag)
                 # check if probe is also same  --> same definition for removing overlap as in AN code
-                if dR(std_tree.el_eta, lowpt_tree.el_eta, std_tree.el_phi, lowpt_tree.el_phi) < 0.1:
+                if dR(std_tree.el_eta, lowpt_tree.el_eta, std_tree.el_phi, lowpt_tree.el_phi) < 0.03:
                     # same event, same tag, same probe -> we take standard as preference in overlaps
                     with synclock:
                         for id_i in range(len(IDconditionlist)):
@@ -278,8 +278,22 @@ for id_i in range(len(IDlist)):
     outfile = ROOT.TFile.Open(options.filename, "UPDATE")
     wpname = "beIdCo" if IDlist[id_i] == "" else "afIdCo_"+IDlist[id_i]
     savetree = readfiles[id_i].tnpCombinedEleIDs_temp.Get("fitter_tree").CloneTree()
-    newdir = ROOT.TDirectoryFile("tnpCombinedEle_StdPref_"+wpname+"_IDs","tnpCombinedEle_StdPref_"+wpname+"_IDs")
-    newdir.WriteObject(savetree,"fitter_tree")
+
+    # old way:
+    #newdir = ROOT.TDirectoryFile("tnpCombinedEle_StdPref_"+wpname+"_IDs","tnpCombinedEle_StdPref_"+wpname+"_IDs")
+    #newdir.WriteObject(savetree,"fitter_tree")
+
+    dirname = "tnpCombinedEle_StdPref_" + wpname + "_IDs"
+
+    # If directory exists (script called by reprocessing), remove it
+    if outfile.GetDirectory(dirname):
+        outfile.rmdir(dirname)
+
+    newdir = outfile.mkdir(dirname)
+    newdir.cd()
+
+    savetree.Write("fitter_tree", ROOT.TObject.kOverwrite)
+
     outfile.Close()
 
 for id_i in range(len(IDlist)):
